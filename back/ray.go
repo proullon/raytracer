@@ -4,7 +4,7 @@ import (
 	"container/list"
 )
 
-func choose_color(objects *list.List) (color int) {
+func findClosestObject(objects *list.List) (closest Object) {
 	var lower, k float64
 	var obj Object
 
@@ -15,7 +15,7 @@ func choose_color(objects *list.List) (color int) {
 		k = obj.K()
 		if k > 0 && k < lower {
 			lower = k
-			color = obj.Color()
+			closest = obj
 		}
 	}
 
@@ -41,5 +41,15 @@ func Ray(x int, y int, width int, heigth int, objects *list.List, eye *Eye, ligh
 		findIntersection(baseline, eye, e.Value.(Object))
 	}
 
-	return choose_color(objects)
+	obj := findClosestObject(objects)
+
+
+	// -- TO REMOVE
+	if obj == nil {
+		return 0
+	}
+	return obj.Color()
+	// -- TO REMOVE
+
+	return setLight(baseline, eye, lights, obj)
 }

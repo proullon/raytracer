@@ -2,6 +2,7 @@ package back
 
 import (
 	"math"
+   "container/list"
 )
 
 type Sphere struct {
@@ -43,4 +44,46 @@ func (s *Sphere) Intersection(baseline Coord, eye *Eye) {
    }
 
    return
+}
+
+/* v = baseline
+   s = obj
+*/
+
+// int   sphere_light(t_light *light)
+// {
+//   t_pt      l;
+//   t_pt      n;
+//   double k;
+
+//   k = obj->k;
+//   baseline->x -= obj->x;
+//   baseline->y -= obj->y;
+//   baseline->z -= obj->z;
+//   n.x = (double) eye->x + baseline->x * k;
+//   n.y = (double) eye->y + baseline->y * k;
+//   n.z = (double) eye->z + baseline->z * k;
+//   l.x = (double) spot->x - n.x;
+//   l.y = (double) spot->y - n.y;
+//   l.z = (double) spot->z - n.z;
+//   return (calc_light(&l, &n, obj->color));
+// }
+
+func (s *Sphere) Light(baseline Coord, eye *Eye, lights *list.List) (color int) {
+   var l, n Coord
+
+   baseline.x -= s.x
+   baseline.y -= s.y
+   baseline.z -= s.z
+
+   n.x = eye.x + baseline.x * s.k
+   n.y = eye.y + baseline.y * s.k
+   n.z = eye.x + baseline.z * s.k
+
+   spot := lights.Front().Value.(*Light)
+   l.x = spot.x - n.x
+   l.y = spot.y - n.y
+   l.z = spot.z - n.z
+
+   return light(&l, &n, s.color)
 }

@@ -1,9 +1,14 @@
 package back
 
+import (
+	"container/list"
+)
+
 type Object interface {
 	Intersection(baseline Coord, eye *Eye)
 	K() float64
 	Color() int
+	Light(baseline Coord, eye *Eye, lights *list.List) int
 
 	X() float64
 	Y() float64

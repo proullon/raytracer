@@ -1,5 +1,5 @@
 window.onload = function() {
-	var size = 300;
+	var size = 900;
 	var canvas = document.getElementById('canvas');
 	var ctx = canvas.getContext('2d');
 	var w = size;
@@ -8,28 +8,49 @@ window.onload = function() {
 	canvas.width  = w;
 	canvas.height = h;
 
-	image = getImage();
-	// drawBackground(ctx, w, h);
-	draw(ctx, image, w, h);
+    this.socket = new WebSocket('ws://' + window.location.host + '/ws/raytracer');
+    this.socket.onmessage = function (event) {
+        // console.log("socket.onmessage : " + event)
+	    var pixels = JSON.parse(event.data);
+	    i = 0;
+	    while (pixels[i] != null) {
+		    drawPixel(ctx, pixels[i]);
+		    i++;	    	
+	    }
+    }
+    this.socket.onclose = function() {
+        console.log("socket.onclose");
+    }
+
+	// image = getImage();
+	// draw(ctx, image, w, h);
 }
 
 
 function getImage(size) {
 
-	// Création de l'objet XmlHttpRequest
 	var xhr = getXMLHttpRequest();
 
-	// Chargement du fichier
 	xhr.open("GET", '/api/raytracer', false);
 	xhr.send(null);
 	if(xhr.readyState != 4 || (xhr.status != 200 && xhr.status != 0)) // Code == 0 en local
-		throw new Error("Impossible de charger la carte nommée \"" + nom + "\" (code HTTP : " + xhr.status + ").");
+		throw new Error("Cannot fetch image from server (HTTP : " + xhr.status + ").");
 	var imgJsonData = xhr.responseText;
 
-	// Analyse des données
 	var img = JSON.parse(imgJsonData);
 
 	return img;	
+}
+
+function drawPixel(ctx, pixel) {
+	var imageData = ctx.createImageData(1, 1)
+
+	imageData.data[0] = pixel.R
+	imageData.data[1] = pixel.G
+	imageData.data[2] = pixel.B
+	imageData.data[3] = 255
+
+	ctx.putImageData(imageData, pixel.X, pixel.Y)
 }
 
 function drawBackground(ctx, w, h) {
@@ -51,14 +72,6 @@ function drawBackground(ctx, w, h) {
 function draw(ctx, img, w, h) {
 	var imageData = ctx.createImageData(1, 1)
 
-	// Set red color
-	imageData.data[0] = 255
-	imageData.data[1] = 0
-	imageData.data[2] = 0
-	imageData.data[3] = 255
-
-	ctx.putImageData(imageData, 5, 5)
-
 	var x = 0;
 	while (x < h) {
 
@@ -66,7 +79,11 @@ function draw(ctx, img, w, h) {
 		while (y < w) {
 
 			color = img[x][y];
-			imageData.data[0] = color;
+			console.log("R:" + color.R + " G:" + color.G + " B:" + color.B);
+			imageData.data[0] = color.R;
+			imageData.data[1] = color.G;
+			imageData.data[2] = color.B;
+			imageData.data[3] = 255;
 			ctx.putImageData(imageData, x, y)
 
 			y++;

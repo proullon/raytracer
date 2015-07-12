@@ -6,24 +6,25 @@ import (
 	"path"
 	"fmt"
 	"net/http"
-	"encoding/json"
-	"container/list"
+	// "encoding/json"
+	// "container/list"
 	"github.com/proullon/raytracer/back"
 )
 
-func Raytracer(w http.ResponseWriter, r *http.Request) {
-	objects := list.New()
-	objects.PushBack(back.NewSphere(255, 35))
+// func Raytracer(w http.ResponseWriter, r *http.Request) {
+// 	objects := list.New()
+// 	objects.PushBack(back.NewSphere(255, 75))
 
-	eye := back.NewEye(-170, -50, 0)
+// 	eye := back.NewEye(-170, -50, 0)
 
-	lights := list.New()
-	lights.PushBack(back.Light{})
+// 	lights := list.New()
+// 	spot := back.NewLight(-170, -100, 100, 16777215)
+// 	lights.PushBack(spot)
 
-	image := back.Trace(300, 300, objects, eye, lights)
-    data, _ := json.Marshal(image)
-    fmt.Fprintf(w, "%s", string(data))
-}
+// 	image := back.Trace(300, 300, objects, eye, lights)
+//     data, _ := json.Marshal(image)
+//     fmt.Fprintf(w, "%s", string(data))
+// }
 
 func main() {
 	fmt.Println("Raytracer 0.1")
@@ -35,7 +36,7 @@ func main() {
 
     static_directory = path.Join(static_directory, "static")
 
-	http.HandleFunc("/api/raytracer", Raytracer)
+	http.HandleFunc("/ws/raytracer", back.Raytracer)
 	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir(static_directory))))
     err = http.ListenAndServe("127.0.0.1:8080", nil)
     if err != nil {
